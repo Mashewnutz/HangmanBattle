@@ -20,7 +20,7 @@ public class Game : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+		bestStreak = PlayerPrefs.GetInt ("BestStreak", 0);
 	}
 
 	void Awake(){
@@ -94,6 +94,8 @@ public class Game : MonoBehaviour {
 			}
 		} else {			
 			bestStreak = Mathf.Max (currentStreak, bestStreak);
+			PlayerPrefs.SetInt ("BestStreak", bestStreak);
+			PlayerPrefs.Save ();
 
 			resetText.text = "Play again?";
 			currentText.text = "Current Streak: " + currentStreak.ToString ();
