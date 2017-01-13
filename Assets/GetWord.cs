@@ -8,9 +8,6 @@ public class GetWord : MonoBehaviour {
 	Text text;
 	int win;
 
-
-	public string url = "http://www.setgetgo.com/randomword/get.php";
-
 	void Awake() {
 		text = gameObject.GetComponent<Text> ();
 		text.text = "";

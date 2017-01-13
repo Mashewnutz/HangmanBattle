@@ -9,14 +9,16 @@ public class Game : MonoBehaviour {
 	public GameObject youWin;
 	public GameObject gameOver;
 	public GameObject buttons;
-	public GameObject reset;
+	public GameObject nextBtn;
+	public GameObject resultsBtn;
+	public GameObject restartBtn;
 	public GameObject info;
 	public GameObject current;
-	public GameObject best;
+	public Leaderboard leaderboard;
 
-	static int bestStreak =0;
-	static int currentStreak = 0;
-	static int missCounter =0;
+	public static int bestStreak =0;
+	public static int currentStreak = 0;
+	public static int missCounter =0;
 
 	// Use this for initialization
 	void Start () {
@@ -29,10 +31,11 @@ public class Game : MonoBehaviour {
 		youWin = GameObject.Find ("YouWin");
 		gameOver = GameObject.Find ("GameOver");
 		buttons = GameObject.Find ("Buttons");
-		reset = GameObject.Find ("Reset");
+		nextBtn = GameObject.Find ("Next");
+		resultsBtn = GameObject.Find ("Results");
+		restartBtn = GameObject.Find ("Restart");
 		info = GameObject.Find ("Info");
 		current = GameObject.Find ("CurrentStreak");
-		best = GameObject.Find ("BestStreak");
 	}
 
 	public void CheckCharacter(string character){
@@ -53,9 +56,6 @@ public class Game : MonoBehaviour {
 				wordText.color = new Color(1,0,0);
 				wordText.fontStyle = FontStyle.Bold;
 				endGame (false);
-				currentStreak = 0;
-
-
 			}
 		} else {
 			if (wordText.text.Replace(" ",string.Empty) == gameWord.word) {
@@ -79,32 +79,44 @@ public class Game : MonoBehaviour {
 
 	void endGame(bool won){
 		ClearKeys ();
-		reset.SetActive (true);
-		GameObject resetChild = reset.transform.GetChild(0).gameObject;
-		Text resetText = resetChild.GetComponent<Text> ();
+		nextBtn.SetActive (won);
+		resultsBtn.SetActive (!won);
+		resultsBtn.GetComponent<Button> ().interactable = false;
+		restartBtn.SetActive (!won);
 
 		missCounter = 0;
 		current.SetActive (true);
 		Text currentText = current.GetComponent<Text> ();
-		if (won) {
-			resetText.text = "Next";
-			currentText.text = "Current Streak: " + currentStreak.ToString ();
+		if (won) {			
+			currentText.text = "Streak: " + currentStreak.ToString ();
 			if (currentStreak > bestStreak) {
 				currentText.color = Color.yellow;
 			}
 		} else {			
 			bestStreak = Mathf.Max (currentStreak, bestStreak);
+			postScore (bestStreak);
 			PlayerPrefs.SetInt ("BestStreak", bestStreak);
 			PlayerPrefs.Save ();
 
-			resetText.text = "Play again?";
-			currentText.text = "Current Streak: " + currentStreak.ToString ();
-			best.GetComponent<Text>().text = "Best Streak: " + bestStreak.ToString();
-			best.SetActive (true);
+			currentText.text = "Streak: " + currentStreak.ToString ();
 			if (currentStreak >= bestStreak) {
 				currentText.color = Color.yellow;
-				best.GetComponent<Text> ().color = Color.yellow;
+				var colors = resultsBtn.GetComponent<Button> ().colors;
+				colors.normalColor = Color.yellow;
+				resultsBtn.GetComponent<Button> ().colors = colors;
 			}
 		}
+	}
+
+	void postScore(int streak){
+		StartCoroutine (leaderboard.PostAndRefreshTopScores (streak, OnSuccess, OnFailed));
+	}
+
+	void OnSuccess(){
+		resultsBtn.GetComponent<Button> ().interactable = true;
+	}
+
+	void OnFailed() {
+		Debug.Log ("Failed to refresh:");
 	}
 }

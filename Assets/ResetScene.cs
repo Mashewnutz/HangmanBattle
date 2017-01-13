@@ -15,6 +15,7 @@ public class ResetScene : MonoBehaviour {
 	}
 
 	public void OnClick(){
+		Game.currentStreak = 0;	
 		SceneManager.LoadScene ("Hangman");
 	}
 }
